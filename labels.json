@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Azure Cognitive Search",
+        "type": "Product"
+    },
+    {
+        "name": "Azure Storage",
+        "type": "Product"
+    },
+    {
+        "name": "Azure Cognitive Services",
+        "type": "Product"
+    },
+    {
+        "name": "indexer",
+        "type": "Feature"
+    },
+    {
+        "name": "cache",
+        "type": "Feature"
+    },
+    {
+        "name": "analyzer",
+        "type": "Feature"
+    },
+    {
+        "name": "scoring profile",
+        "type": "Feature"
+    },
+    {
+        "name": "boosting",
+        "type": "Feature"
+    },
+    {
+        "name": "knowledge store",
+        "type": "Feature"
+    }
+]
