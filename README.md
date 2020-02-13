@@ -1,5 +1,16 @@
 # label-skill
 
-Part of an active learnign demo for Azure Cognitive Search. This is the label skill. It accepts a document in the custom skill forma and returns a response with each of the tokens annotated with a POS tag and labes annotated with the IOB tag. 
+## Azure Cognitive Search
+Custom named entity recognition is a common challenge for most scenarios in Cognitive Search. When building a named entity recognizer, one of the biggest challenges is a lack of labeled data. For organizations that know examples of entities they want to identify, the label skill takes in a list of labels and as an output generates a set of POS tagged sentences with IOB labels for the entities. 
 
-Labels are provided in the labels.json file.
+## Setup and Use
+
+1. Configure an Azure Cognitive Search instance to ingest documents from blob storage
+2. Setup an enrichment pipeline (skillset) with the label skill
+3. Make sure you use the indexer cache option
+3. Add a knowledge store projection to project out the labeled data
+4. Train a custom entity recognizer based on the labeled dataset
+5. Edit the skillset to add the newly trained model as a custom skill
+6. Rerun the enrichment pipeline to enrich the data using the new skill
+
+
