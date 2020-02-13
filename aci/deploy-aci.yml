@@ -1,0 +1,45 @@
+api-version: 2018-10-01
+location: westus
+name: app-with-ssl
+properties:
+  containers:
+  - name: nginx-with-ssl
+    properties:
+      image: nginx
+      ports:
+      - port: 443
+        protocol: TCP
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGB: 1.5
+      volumeMounts:
+      - name: nginx-config
+        mountPath: /etc/nginx
+  - name: my-app
+    properties:
+      image: <acr name>.azurecr.io/<container name>
+      ports:
+      - port: 8080
+        protocol: TCP
+      resources:
+        requests:
+          cpu: 1.0
+          memoryInGB: 1.5
+  imageRegistryCredentials:
+  - server: grokimages.azurecr.io
+    username: <ACR username>
+    password: <ACR Password>
+  volumes:
+  - secret:
+      ssl.crt: <base64 encoded cert>
+      ssl.key: <base64 encoded key>
+      nginx.conf: <base64 encoded nginx conf file>
+    name: nginx-config
+  ipAddress:
+    ports:
+    - port: 443
+      protocol: TCP
+    type: Public
+  osType: Linux
+tags: null
