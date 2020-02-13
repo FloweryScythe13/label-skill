@@ -14,3 +14,8 @@ Custom named entity recognition is a common challenge for most scenarios in Cogn
 6. Rerun the enrichment pipeline to enrich the data using the new skill
 
 
+### Deploy the label skill as a ACI Container.
+
+To deploy the label skill as an ACI container follow the following steps:
+1. Follow the steps <a href="https://docs.microsoft.com/en-us/azure/container-instances/container-instances-container-group-ssl">documented here</a> to create a SSL endpoint 
+2. 
