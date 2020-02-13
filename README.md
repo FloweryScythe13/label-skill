@@ -17,5 +17,8 @@ Custom named entity recognition is a common challenge for most scenarios in Cogn
 ### Deploy the label skill as a ACI Container.
 
 To deploy the label skill as an ACI container follow the following steps:
-1. Follow the steps <a href="https://docs.microsoft.com/en-us/azure/container-instances/container-instances-container-group-ssl">documented here</a> to create a SSL endpoint 
-2. 
+1. Clone this repo and build the Dockerfile to create a container
+2. Push the image to your <a href="https://docs.microsoft.com/en-us/azure/container-instances/container-instances-tutorial-prepare-acr">container registry</a>
+Follow the steps <a href="https://docs.microsoft.com/en-us/azure/container-instances/container-instances-container-group-ssl">documented here</a> to create a SSL endpoint 
+3. Use the <a href="aci/deploy-aci.yml">deploy-aci.yml</a> file to deploy your skill as an SSL enabled endpoint
+
