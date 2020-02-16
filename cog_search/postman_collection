@@ -1,0 +1,178 @@
+{
+	"info": {
+		"_postman_id": "406dc08a-8c6d-4180-9d4a-8234dba6e0a9",
+		"name": "km-aml-v2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Datasource",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"value": "{{admin-key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n            \"name\": \"markdown-ds\",\r\n            \"description\": null,\r\n            \"type\": \"azureblob\",\r\n            \"subtype\": null,\r\n            \"credentials\": {\r\n                \"connectionString\": \"{{storage-connection-string}}\"\r\n            },\r\n            \"container\": {\r\n                \"name\": \"docs-markdown\",\r\n                \"query\": null\r\n            },\r\n            \"dataChangeDetectionPolicy\": null,\r\n            \"dataDeletionDetectionPolicy\": null\r\n        }"
+				},
+				"url": {
+					"raw": "https://{{search-service-name}}.search.windows.net/datasources?api-version=2019-05-06-Preview",
+					"protocol": "https",
+					"host": [
+						"{{search-service-name}}",
+						"search",
+						"windows",
+						"net"
+					],
+					"path": [
+						"datasources"
+					],
+					"query": [
+						{
+							"key": "api-version",
+							"value": "2019-05-06-Preview"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Index",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"type": "text",
+						"value": "{{admin-key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"markdown-idx\",\r\n    \"defaultScoringProfile\": \"\",\r\n    \"fields\": [\r\n        {\r\n            \"name\": \"content\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": true,\r\n            \"filterable\": false,\r\n            \"retrievable\": true,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": \"standard.lucene\",\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_storage_content_type\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_storage_size\",\r\n            \"type\": \"Edm.Int64\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_storage_last_modified\",\r\n            \"type\": \"Edm.DateTimeOffset\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_storage_content_md5\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_storage_name\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_storage_path\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": true,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": true,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_content_type\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_language\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_author\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"metadata_title\",\r\n            \"type\": \"Edm.String\",\r\n            \"searchable\": false,\r\n            \"filterable\": false,\r\n            \"retrievable\": false,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": null,\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"entities\",\r\n            \"type\": \"Collection(Edm.String)\",\r\n            \"searchable\": true,\r\n            \"filterable\": false,\r\n            \"retrievable\": true,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": \"standard.lucene\",\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"text\",\r\n            \"type\": \"Collection(Edm.String)\",\r\n            \"searchable\": true,\r\n            \"filterable\": false,\r\n            \"retrievable\": true,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": \"standard.lucene\",\r\n            \"synonymMaps\": []\r\n        },\r\n        {\r\n            \"name\": \"layoutText\",\r\n            \"type\": \"Collection(Edm.String)\",\r\n            \"searchable\": true,\r\n            \"filterable\": false,\r\n            \"retrievable\": true,\r\n            \"sortable\": false,\r\n            \"facetable\": false,\r\n            \"key\": false,\r\n            \"indexAnalyzer\": null,\r\n            \"searchAnalyzer\": null,\r\n            \"analyzer\": \"standard.lucene\",\r\n            \"synonymMaps\": []\r\n        }\r\n    ],\r\n    \"scoringProfiles\": [],\r\n    \"corsOptions\": null,\r\n    \"suggesters\": [],\r\n    \"analyzers\": [],\r\n    \"tokenizers\": [],\r\n    \"tokenFilters\": [],\r\n    \"charFilters\": [],\r\n    \"encryptionKey\": null,\r\n    \"similarity\": null\r\n}"
+				},
+				"url": {
+					"raw": "https://{{search-service-name}}.search.windows.net/indexes?api-version=2019-05-06-Preview",
+					"protocol": "https",
+					"host": [
+						"{{search-service-name}}",
+						"search",
+						"windows",
+						"net"
+					],
+					"path": [
+						"indexes"
+					],
+					"query": [
+						{
+							"key": "api-version",
+							"value": "2019-05-06-Preview"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Skillset",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"type": "text",
+						"value": "{{admin-key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n            \"name\": \"markdown-ss\",\r\n            \"description\": \"A sample skillset to demonstrate the use of projections to the knowledge store to train an Azure ML model\",\r\n            \"skills\": [\r\n                {\r\n\t\t        \"@odata.type\": \"#Microsoft.Skills.Custom.WebApiSkill\",\r\n\t\t        \"description\": \"Skill to generate labels and POS data\",\r\n\t\t        \"uri\": \"https://{{webapp}}.azurewebsites.net/label\",\r\n\t\t          \"context\": \"/document/content\",\r\n\t\t          \"inputs\": [\r\n\t\t            {\r\n\t\t              \"name\": \"doc\",\r\n\t\t              \"source\": \"/document/content\"\r\n\t\t            }\r\n\t\t          ],\r\n\t\t          \"outputs\": [\r\n\t\t            {\r\n\t\t              \"name\": \"result\",\r\n\t\t              \"targetName\": \"results\"\r\n\t\t            }\r\n\t\t          ]\r\n\t\t      }\r\n            ],\r\n            \"cognitiveServices\": {\r\n                \"@odata.type\": \"#Microsoft.Azure.Search.CognitiveServicesByKey\",\r\n                \"description\": \"DemosCS\",\r\n                \"key\": \"{{cognitive-services-key}}\"\r\n            },\r\n            \"knowledgeStore\": {\r\n                \"storageConnectionString\": \"{{storage-connection-string}}\",\r\n                \"projections\": [\r\n                    {\r\n                        \"tables\": [\r\n                        \t{\r\n                                \"tableName\": \"sentences\",\r\n                                \"referenceKeyName\": null,\r\n                                \"generatedKeyName\": \"SentenceId\",\r\n                                \"source\": \"/document/content/results/*\",\r\n                                \"sourceContext\": null,\r\n                                \"inputs\": []\r\n                            },\r\n                            {\r\n                                \"tableName\": \"labels\",\r\n                                \"referenceKeyName\": null,\r\n                                \"generatedKeyName\": \"AnnotationId\",\r\n                                \"source\": \"/document/content/results/*/annotations/*\",\r\n                                \"sourceContext\": null,\r\n                                \"inputs\": []\r\n                            }\r\n\r\n                        ],\r\n                        \"objects\": [\r\n                          \r\n                        ],\r\n                        \"files\": [\r\n                           \r\n                        ]\r\n                    }\r\n                ]\r\n            }\r\n        }"
+				},
+				"url": {
+					"raw": "https://{{search-service-name}}.search.windows.net/skillsets?api-version=2019-05-06-Preview",
+					"protocol": "https",
+					"host": [
+						"{{search-service-name}}",
+						"search",
+						"windows",
+						"net"
+					],
+					"path": [
+						"skillsets"
+					],
+					"query": [
+						{
+							"key": "api-version",
+							"value": "2019-05-06-Preview"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Indexer",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "api-key",
+						"type": "text",
+						"value": "{{admin-key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"markdown-idxr\",\r\n    \"description\": \"\",\r\n    \"dataSourceName\": \"markdown-ds\",\r\n    \"skillsetName\": \"markdown-ss\",\r\n    \"targetIndexName\": \"markdown-idx\",\r\n    \"disabled\": null,\r\n    \"schedule\": null,\r\n    \"parameters\": {\r\n        \"batchSize\": null,\r\n        \"maxFailedItems\": 0,\r\n        \"maxFailedItemsPerBatch\": 0,\r\n        \"base64EncodeKeys\": null,\r\n        \"configuration\": {\r\n            \"dataToExtract\": \"contentAndMetadata\",\r\n            \"parsingMode\": \"default\",\r\n            \"imageAction\": \"generateNormalizedImages\"\r\n        }\r\n    },\r\n    \"fieldMappings\": [\r\n        {\r\n            \"sourceFieldName\": \"metadata_storage_path\",\r\n            \"targetFieldName\": \"metadata_storage_path\",\r\n            \"mappingFunction\": {\r\n                \"name\": \"base64Encode\",\r\n                \"parameters\": null\r\n            }\r\n        }\r\n    ],\r\n    \"outputFieldMappings\": [\r\n      \r\n     \r\n    ],\r\n    \"cache\": {\r\n        \"enableReprocessing\": true,\r\n        \"storageConnectionString\": \"{{storage-connection-string}}\"\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "https://{{search-service-name}}.search.windows.net/indexers?api-version=2019-05-06-Preview",
+					"protocol": "https",
+					"host": [
+						"{{search-service-name}}",
+						"search",
+						"windows",
+						"net"
+					],
+					"path": [
+						"indexers"
+					],
+					"query": [
+						{
+							"key": "api-version",
+							"value": "2019-05-06-Preview"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
