@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request, make_response, current_app
+from flask import Flask, redirect, url_for, request, make_response, current_app, jsonify
 import json
 import plac
 from spacy.lang.en import English
@@ -31,7 +31,7 @@ def compose_response(json_data):
         output_record = transform_value(value)
         if output_record != None:
             results["values"].append(output_record)
-    return json.dumps(results, ensure_ascii=False)
+    return results
 
 ## Perform an operation on a record
 def transform_value(value):
@@ -70,7 +70,7 @@ def transform_value(value):
     return ({
             "recordId": recordId,
             "data": {
-                "text": json.dumps(annotated_doc)
+                "result": annotated_doc
                     }
             })
 
@@ -89,10 +89,10 @@ def annotate_doc(raw_doc):
 
     output = []
     for sent in doc.sents:
-        line = { "text" : sent.text}
-        line["values"] = []
+        line = { "sentence" : sent.text}
+        line["annotations"] = []
         for token in sent:
-            line["values"].append({"token": token.text, "POS": token.tag_, "label": 'O' if token._.type == False else token._.type})
+            line["annotations"].append({"token": token.text, "POS": token.tag_, "label": 'O' if token._.type == False else token._.type})
         output.append(line)
     
     return output
@@ -126,14 +126,14 @@ class CustomTagsComponent(object):
         # Register attribute on the Token. We'll be overwriting this based on
         # the matches, so we're only setting a default value, not a getter.
         # If no default value is set, it defaults to None.
-        Token.set_extension("is_product", default=False)
-        Token.set_extension("type", default=False)
+        Token.set_extension("is_product", default=False, force=True)
+        Token.set_extension("type", default=False, force=True)
 
 
         # Register attributes on Doc and Span via a getter that checks if one of
         # the contained tokens is set to is_country == True.
-        Doc.set_extension("has_product", getter=self.has_product)
-        Span.set_extension("has_product", getter=self.has_product)
+        Doc.set_extension("has_product", getter=self.has_product, force=True)
+        Span.set_extension("has_product", getter=self.has_product, force=True)
 
     def __call__(self, doc):
         """Apply the pipeline component on a Doc object and modify it if matches
@@ -170,6 +170,12 @@ class CustomTagsComponent(object):
         which is already set in the processing step."""
         return any([t._.get("is_product") for t in tokens])
 
+def save_labels(body):
+    with open('labels.json', 'r+', encoding='utf-8') as f:
+        
+        f.seek(0)
+        json.dump(body, f, ensure_ascii=False, indent=4)
+        f.truncate()
 
 
 def create_app():
@@ -178,11 +184,36 @@ def create_app():
 
     @app.route("/", methods = ['GET'])
     def index_get():
-        content = "Hello world"
+        content = "To invoke the skill POST the custom skill request payload to the /label endpoint. To set the custom entities, POST to the /annotations endopoint. For a sample, GET the /annotations."
         return make_response(content, 200)
 
+    @app.route("/annotations", methods = ['GET'])
+    def annotations_get():
+        APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(APP_ROOT, 'labels.json')) as f:
+    
+            labels = json.loads(f.read())
+            return jsonify(labels)
+        return make_response("Error reading labels.json", 500)
+            
+                
+    @app.route("/annotations", methods = ['POST'])
+    def annotations():
+        try:
+            body = request.get_json()
+        except ValueError:
+            resp = make_response("Invalid body", 400)
+            return resp
+    
+        if body:
+            result = save_labels(body)
+            return jsonify(result), 201
+        else:
+            resp = make_response("Invalid body", 400)
+            return resp
 
-    @app.route("/", methods = ['POST'])
+
+    @app.route("/label", methods = ['POST'])
     def index():
         try:
             body = json.dumps(request.get_json())
@@ -192,9 +223,7 @@ def create_app():
     
         if body:
             result = compose_response(body)
-            resp = make_response(result, 200 )
-            resp.headers['Content-Type'] = 'application/json'
-            return resp
+            return jsonify(result)
         else:
             resp = make_response("Invalid body", 400)
             return resp

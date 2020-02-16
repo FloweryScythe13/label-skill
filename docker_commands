@@ -1,0 +1,8 @@
+sudo docker build -t vkurpad/ner-label .
+sudo docker run -d -p 8080:8080 --name tagger-5 vkurpad/ner-label
+sudo docker commit 11a0e50b8bc4 vkurpad/ner-label
+sudo docker push vkurpad/ner-label
+sudo docker tag vkurpad/ner-label grokimages.azurecr.io/skills/ner-label
+sudo docker push grokimages.azurecr.io/skills/ner-label
+
+waitress-serve --call "main:create_app"
