@@ -25,7 +25,7 @@ Custom named entity recognition is a common challenge for most scenarios in Cogn
 2. Copy he JSON response, edit it to define the custom entities and types you want to label in your dataset
 3. POST the edited JSON to `https://{your web app name}.azurewebsites.net/annotations` 
 4. Your skill is now ready to use with a valid payload
-5. Use the [Postman collection](cog_search/postman_collection.json) to 
+5. Use the [Postman collection](cog_search/postman_collection) to 
     + Create a datasource
     + Create a skillset
     + Create a index
