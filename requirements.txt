@@ -1,5 +1,7 @@
+
 Flask>=1.0.0
 spacy
 numpy
 waitress
 pandas
+opencensus-ext-azure

@@ -9,18 +9,27 @@ import pandas as pd
 import traceback
 import os
 import logging
-
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter(
-        '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-logger.setLevel(logging.DEBUG)
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
 
 
-def compose_response(json_data):
+logger = logging.getLogger(__name__)
+
+# TODO: replace the all-zero GUID with your instrumentation key.
+logger.addHandler(AzureLogHandler(
+    connection_string='InstrumentationKey=057bd4ae-0af2-461c-b599-b72e96452752')
+)
+
+# logger = logging.getLogger()
+# handler = logging.StreamHandler()
+# formatter = logging.Formatter(
+#         '%(asctime)s %(name)-12s %(levelname)-8s %(message)s')
+# handler.setFormatter(formatter)
+# logger.addHandler(handler)
+# logger.setLevel(logging.DEBUG)
+
+
+def compose_response(json_data, nlp):
     values = json.loads(json_data)['values']
     
     # Prepare the Output before the loop
@@ -28,13 +37,13 @@ def compose_response(json_data):
     results["values"] = []
     
     for value in values:
-        output_record = transform_value(value)
+        output_record = transform_value(value, nlp)
         if output_record != None:
             results["values"].append(output_record)
     return results
 
 ## Perform an operation on a record
-def transform_value(value):
+def transform_value(value, nlp):
     try:
         recordId = value['recordId']
     except AssertionError  as error:
@@ -54,9 +63,8 @@ def transform_value(value):
             })
 
     try:                
-        #concatenated_string = value['data']['text1'] + " " + value['data']['text2']  
-        # Here you could do something more interesting with the inputs
-        annotated_doc = annotate_doc(value['data']['doc'])
+        # annotate the doc with the IOB tags based on the labls provided.
+        annotated_doc = annotate_doc(value['data']['doc'], nlp)
     except Exception as e:
         print(e)
         print(traceback.format_exc())
@@ -74,27 +82,30 @@ def transform_value(value):
                     }
             })
 
-def annotate_doc(raw_doc):
-    nlp = spacy.load("en_core_web_sm")
-    nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
-    custom_tags = CustomTagsComponent(nlp)  # initialise component
-    nlp.add_pipe(custom_tags)  # add it to the pipeline
-    nlp.remove_pipe("ner")
-    print("Pipeline", nlp.pipe_names)
+def annotate_doc(raw_doc, nlp):
+    
     doc = nlp(raw_doc)
     param = [[token.text, token.tag_] for token in doc]
     df=pd.DataFrame(param)
     headers = ['text',  'tag']
     df.columns = headers  
-
+    sentence_count = 0
+    res = {}
+    annotation_count = 0
     output = []
     for sent in doc.sents:
-        line = { "sentence" : sent.text}
+        line = { "sentence" : sent.text, "sentence_count": sentence_count}
         line["annotations"] = []
+
         for token in sent:
             line["annotations"].append({"token": token.text, "POS": token.tag_, "label": 'O' if token._.type == False else token._.type})
+            if(token._.type != False):
+                annotation_count += 1
         output.append(line)
-    
+        sentence_count += 1
+    res["sentence_count"] = sentence_count
+    res["annotation_count"] = annotation_count
+    logger.debug(f'PRocessed file with {res["sentence_count"]} sentences and found {res["annotation_count"]} annotations')
     return output
 
 class CustomTagsComponent(object):
@@ -102,30 +113,25 @@ class CustomTagsComponent(object):
 
     name = "custom_tags"  # component name, will show up in the pipeline
 
-    def __init__(self, nlp, label="GPE"):
-        """Initialise the pipeline component. The shared nlp instance is used
-        to initialise the matcher with the shared vocab, get the label ID and
-        generate Doc objects as phrase match patterns.
-        """
-        # Make request once on initialisation and store the data
+    def __init__(self, nlp, label="PRODUCT"):
+       
         labels = []
         APP_ROOT = os.path.dirname(os.path.abspath(__file__))
         
         with open(os.path.join(APP_ROOT, 'labels.json')) as f:
-        #with current_app.open_resource("labels.json") as f:
+        
             labels = json.loads(f.read())
         
         self.labels = { c["name"]: c for c in labels}
         self.label = nlp.vocab.strings[label]  # get entity label ID
-
-        # Set up the PhraseMatcher with Doc patterns for each country name
+        
+        
         patterns = [nlp(c) for c in self.labels.keys()]
         self.matcher = PhraseMatcher(nlp.vocab)
         self.matcher.add("PRODUCTS", None, *patterns)
 
-        # Register attribute on the Token. We'll be overwriting this based on
-        # the matches, so we're only setting a default value, not a getter.
-        # If no default value is set, it defaults to None.
+        # Register attribute on the Token. We'll be overwriting this based on the matches
+        
         Token.set_extension("is_product", default=False, force=True)
         Token.set_extension("type", default=False, force=True)
 
@@ -147,8 +153,7 @@ class CustomTagsComponent(object):
             entity = Span(doc, start, end, label=self.label)
             spans.append(entity)
             # Set custom attribute on each token of the entity
-            # Can be extended with other data returned by the API, like
-            # currencies, country code, flag, calling code etc.
+            
             first = True
             for token in entity:
                 token._.set("is_product", True)
@@ -181,6 +186,13 @@ def save_labels(body):
 def create_app():
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
+    nlp = spacy.load("en_core_web_sm")
+    nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
+    custom_tags = CustomTagsComponent(nlp)  # initialise component
+    nlp.add_pipe(custom_tags)  # add it to the pipeline
+    # remove all other default compoennets to minimize work performed
+    nlp.remove_pipe("ner")
+    print("Pipeline", nlp.pipe_names)
 
     @app.route("/", methods = ['GET'])
     def index_get():
@@ -217,12 +229,13 @@ def create_app():
     def index():
         try:
             body = json.dumps(request.get_json())
+            #logger.warning(body)
         except ValueError:
             resp = make_response("Invalid body", 400)
             return resp
     
         if body:
-            result = compose_response(body)
+            result = compose_response(body, nlp)
             return jsonify(result)
         else:
             resp = make_response("Invalid body", 400)
