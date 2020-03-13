@@ -1,5 +1,5 @@
-```
-'''Command:''' sudo docker build -t {your docker id}/ner-label .
+
+`Command:` sudo docker build -t {your docker id}/ner-label .
 ```Example:``` sudo docker build -t vkurpad/ner-label .
 
 sudo docker run -d -p 8080:8080 --name tagger-5 vkurpad/ner-label
