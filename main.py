@@ -64,6 +64,12 @@ def transform_value(value, nlp):
 
     try:                
         # annotate the doc with the IOB tags based on the labls provided.
+        nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
+        custom_tags = CustomTagsComponent(nlp)  # initialise component
+        nlp.add_pipe(custom_tags)  # add it to the pipeline
+        # remove all other default compoennets to minimize work performed
+        nlp.remove_pipe("ner")
+        print("Pipeline", nlp.pipe_names)
         annotated_doc = annotate_doc(value['data']['doc'], nlp)
     except Exception as e:
         print(e)
@@ -83,8 +89,7 @@ def transform_value(value, nlp):
             })
 
 def annotate_doc(raw_doc, nlp):
-    custom_tags = CustomTagsComponent(nlp)  # initialise component
-    nlp.add_pipe(custom_tags)  # add it to the pipeline
+    
     doc = nlp(raw_doc)
     param = [[token.text, token.tag_] for token in doc]
     df=pd.DataFrame(param)
@@ -188,11 +193,7 @@ def create_app():
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
     nlp = spacy.load("en_core_web_sm")
-    nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
     
-    # remove all other default compoennets to minimize work performed
-    nlp.remove_pipe("ner")
-    print("Pipeline", nlp.pipe_names)
 
     @app.route("/", methods = ['GET'])
     def index_get():
