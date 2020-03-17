@@ -64,12 +64,7 @@ def transform_value(value, nlp):
 
     try:                
         # annotate the doc with the IOB tags based on the labls provided.
-        nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
-        custom_tags = CustomTagsComponent(nlp)  # initialise component
-        nlp.add_pipe(custom_tags)  # add it to the pipeline
-        # remove all other default compoennets to minimize work performed
-        nlp.remove_pipe("ner")
-        print("Pipeline", nlp.pipe_names)
+        
         annotated_doc = annotate_doc(value['data']['doc'], nlp)
     except Exception as e:
         print(e)
@@ -193,11 +188,16 @@ def create_app():
     app = Flask(__name__)
     app.logger.setLevel(logging.DEBUG)
     nlp = spacy.load("en_core_web_sm")
-    
+    nlp.add_pipe(nlp.create_pipe('sentencizer'), first=True)
+    custom_tags = CustomTagsComponent(nlp)  # initialise component
+    nlp.add_pipe(custom_tags)  # add it to the pipeline
+    # remove all other default compoennets to minimize work performed
+    nlp.remove_pipe("ner")
+    print("Pipeline", nlp.pipe_names)
 
     @app.route("/", methods = ['GET'])
     def index_get():
-        content = "To invoke the skill POST the custom skill request payload to the /label endpoint. To set the custom entities, POST to the /annotations endopoint. For a sample, GET the /annotations."
+        content = "To invoke the skill POST the custom skill request payload to the /label endpoint. To set the custom entities, POST to the /annotations endopoint. For a sample, GET the /annotations. v1.0"
         return make_response(content, 200)
 
     @app.route("/annotations", methods = ['GET'])
@@ -220,6 +220,8 @@ def create_app():
     
         if body:
             result = save_labels(body)
+            custom_tags = CustomTagsComponent(nlp)  # initialise component
+            nlp.replace_pipe("custom_tags", custom_tags)  # add it to the pipeline
             return jsonify(result), 201
         else:
             resp = make_response("Invalid body", 400)
