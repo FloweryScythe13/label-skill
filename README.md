@@ -1,5 +1,5 @@
 # label-skill
-https://img.shields.io/static/v1?label=Language&message=python&color=orange
+[python](https://img.shields.io/static/v1?label=Language&message=python&color=orange)
 ## Azure Cognitive Search
 Custom named entity recognition is a common challenge for most scenarios in [Azure Cognitive Search](https://docs.microsoft.com/en-us/azure/search/search-what-is-azure-search). When building a named entity recognizer, one of the biggest challenges is a lack of labeled data. For organizations that know examples of entities they want to identify, the label skill takes in a list of custom entities and associated types and as an output, generates a set of POS tagged sentences with IOB labels for the entities. 
 
